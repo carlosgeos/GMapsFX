@@ -4,6 +4,7 @@ import com.lynden.gmapsfx.javascript.event.UIEventType;
 import com.lynden.gmapsfx.javascript.object.*;
 import com.lynden.gmapsfx.service.directions.DirectionsRenderer;
 import com.lynden.gmapsfx.shapes.*;
+import com.lynden.gmapsfx.util.ApiKeyUtil;
 import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
@@ -34,18 +35,18 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
     private Label lblCenter;
     private Label lblClick;
     private ComboBox<MapTypeIdEnum> mapTypeCombo;
-	
-	private MarkerOptions markerOptions2;
-	private Marker myMarker2;
-	private Button btnHideMarker;
-	private Button btnDeleteMarker;
 
-        
+    private MarkerOptions markerOptions2;
+    private Marker myMarker2;
+    private Button btnHideMarker;
+    private Button btnDeleteMarker;
+
+
     @Override
     public void start(final Stage stage) throws Exception {
-        mapComponent = new ClusteredGoogleMapView(null, Locale.getDefault().getLanguage(), null, true);
+        mapComponent = new ClusteredGoogleMapView(null, Locale.getDefault().getLanguage(), ApiKeyUtil.getApiKey(), true);
         mapComponent.addMapInializedListener(this);
-                
+
         BorderPane bp = new BorderPane();
         ToolBar tb = new ToolBar();
 
@@ -64,32 +65,36 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
         lblZoom = new Label();
         lblCenter = new Label();
         lblClick = new Label();
-        
+
         mapTypeCombo = new ComboBox<>();
-        mapTypeCombo.setOnAction( e -> {
-           map.setMapType(mapTypeCombo.getSelectionModel().getSelectedItem() );
+        mapTypeCombo.setOnAction(e -> {
+            map.setMapType(mapTypeCombo.getSelectionModel().getSelectedItem());
         });
         mapTypeCombo.setDisable(true);
-        
+
         Button btnType = new Button("Map type");
         btnType.setOnAction(e -> {
             map.setMapType(MapTypeIdEnum.HYBRID);
         });
-		
-		btnHideMarker = new Button("Hide Marker");
-		btnHideMarker.setOnAction(e -> {hideMarker();});
-		
-		btnDeleteMarker = new Button("Delete Marker");
-		btnDeleteMarker.setOnAction(e -> {deleteMarker();});
-		
+
+        btnHideMarker = new Button("Hide Marker");
+        btnHideMarker.setOnAction(e -> {
+            hideMarker();
+        });
+
+        btnDeleteMarker = new Button("Delete Marker");
+        btnDeleteMarker.setOnAction(e -> {
+            deleteMarker();
+        });
+
         tb.getItems().addAll(btnZoomIn, btnZoomOut, mapTypeCombo,
                 new Label("Zoom: "), lblZoom,
                 new Label("Center: "), lblCenter,
                 new Label("Click: "), lblClick,
-				btnHideMarker, btnDeleteMarker);
+                btnHideMarker, btnDeleteMarker);
 
         bp.setTop(tb);
-        
+
         bp.setCenter(mapComponent);
 
         Scene scene = new Scene(bp);
@@ -98,19 +103,19 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
     }
 
     DirectionsRenderer renderer;
-    
+
     @Override
     public void mapInitialized() {
-        
+
         //System.out.println("MainApp.mapInitialised....");
-        
+
         //Once the map has been loaded by the Webview, initialize the map details.
         LatLong center = new LatLong(47.606189, -122.335842);
         mapComponent.addMapReadyListener(() -> {
             // This call will fail unless the map is completely ready.
             checkCenter(center);
         });
-        
+
         MapOptions options = new MapOptions();
         options.center(center)
                 .mapMarker(true)
@@ -123,11 +128,11 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
                 .zoomControl(false)
                 .mapType(MapTypeIdEnum.TERRAIN)
                 .styleString("[{'featureType':'landscape','stylers':[{'saturation':-100},{'lightness':65},{'visibility':'on'}]},{'featureType':'poi','stylers':[{'saturation':-100},{'lightness':51},{'visibility':'simplified'}]},{'featureType':'road.highway','stylers':[{'saturation':-100},{'visibility':'simplified'}]},{\"featureType\":\"road.arterial\",\"stylers\":[{\"saturation\":-100},{\"lightness\":30},{\"visibility\":\"on\"}]},{\"featureType\":\"road.local\",\"stylers\":[{\"saturation\":-100},{\"lightness\":40},{\"visibility\":\"on\"}]},{\"featureType\":\"transit\",\"stylers\":[{\"saturation\":-100},{\"visibility\":\"simplified\"}]},{\"featureType\":\"administrative.province\",\"stylers\":[{\"visibility\":\"off\"}]},{\"featureType\":\"water\",\"elementType\":\"labels\",\"stylers\":[{\"visibility\":\"on\"},{\"lightness\":-25},{\"saturation\":-100}]},{\"featureType\":\"water\",\"elementType\":\"geometry\",\"stylers\":[{\"hue\":\"#ffff00\"},{\"lightness\":-25},{\"saturation\":-97}]}]");
-        
+
         //[{\"featureType\":\"landscape\",\"stylers\":[{\"saturation\":-100},{\"lightness\":65},{\"visibility\":\"on\"}]},{\"featureType\":\"poi\",\"stylers\":[{\"saturation\":-100},{\"lightness\":51},{\"visibility\":\"simplified\"}]},{\"featureType\":\"road.highway\",\"stylers\":[{\"saturation\":-100},{\"visibility\":\"simplified\"}]},{\"featureType\":\"road.arterial\",\"stylers\":[{\"saturation\":-100},{\"lightness\":30},{\"visibility\":\"on\"}]},{\"featureType\":\"road.local\",\"stylers\":[{\"saturation\":-100},{\"lightness\":40},{\"visibility\":\"on\"}]},{\"featureType\":\"transit\",\"stylers\":[{\"saturation\":-100},{\"visibility\":\"simplified\"}]},{\"featureType\":\"administrative.province\",\"stylers\":[{\"visibility\":\"off\"}]},{\"featureType\":\"water\",\"elementType\":\"labels\",\"stylers\":[{\"visibility\":\"on\"},{\"lightness\":-25},{\"saturation\":-100}]},{\"featureType\":\"water\",\"elementType\":\"geometry\",\"stylers\":[{\"hue\":\"#ffff00\"},{\"lightness\":-25},{\"saturation\":-97}]}]
-        map = mapComponent.createMap(options,false);
+        map = mapComponent.createMap(options, false);
         directions = mapComponent.getDirec();
-        
+
         map.setHeading(123.2);
 //        System.out.println("Heading is: " + map.getHeading() );
 
@@ -158,8 +163,8 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
 
         InfoWindow window = new InfoWindow(infoOptions);
         window.open(map, myMarker);
-        
-        
+
+
         map.fitBounds(new LatLongBounds(new LatLong(30, 120), center));
 //        System.out.println("Bounds : " + map.getBounds());
 
@@ -188,8 +193,8 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
         btnZoomIn.setDisable(false);
         btnZoomOut.setDisable(false);
         mapTypeCombo.setDisable(false);
-        
-        mapTypeCombo.getItems().addAll( MapTypeIdEnum.ALL );
+
+        mapTypeCombo.getItems().addAll(MapTypeIdEnum.ALL);
 
         LatLong[] ary = new LatLong[]{markerLatLong, markerLatLong2};
         MVCArray mvc = new MVCArray(ary);
@@ -274,34 +279,34 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
             arc.setEditable(!arc.getEditable());
         });
     }
-	
-	
-	private void hideMarker() {
+
+
+    private void hideMarker() {
 //		System.out.println("deleteMarker");
-		
-		boolean visible = myMarker2.getVisible();
-		
-		//System.out.println("Marker was visible? " + visible);
-		
-		myMarker2.setVisible(! visible);
+
+        boolean visible = myMarker2.getVisible();
+
+        //System.out.println("Marker was visible? " + visible);
+
+        myMarker2.setVisible(!visible);
 
 //				markerOptions2.visible(Boolean.FALSE);
 //				myMarker2.setOptions(markerOptions2);
 //		System.out.println("deleteMarker - made invisible?");
-	}
-	
-	private void deleteMarker() {
-		//System.out.println("Marker was removed?");
-		map.removeMarker(myMarker2);
-	}
-	
+    }
+
+    private void deleteMarker() {
+        //System.out.println("Marker was removed?");
+        map.removeMarker(myMarker2);
+    }
+
     private void checkCenter(LatLong center) {
 //        System.out.println("Testing fromLatLngToPoint using: " + center);
 //        Point2D p = map.fromLatLngToPoint(center);
 //        System.out.println("Testing fromLatLngToPoint result: " + p);
 //        System.out.println("Testing fromLatLngToPoint expected: " + mapComponent.getWidth()/2 + ", " + mapComponent.getHeight()/2);
     }
-    
+
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
      * main() serves only as fallback in case the application can not be
@@ -314,4 +319,5 @@ public class ClusteredMainApp extends Application implements MapComponentInitial
         System.setProperty("java.net.useSystemProxies", "true");
         launch(args);
     }
+
 }

@@ -1,68 +1,27 @@
 package com.lynden.gmapsfx;
 
-import com.lynden.gmapsfx.service.elevation.ElevationResult;
-import com.lynden.gmapsfx.service.elevation.ElevationService;
-import com.lynden.gmapsfx.service.elevation.ElevationServiceCallback;
-import com.lynden.gmapsfx.service.elevation.ElevationStatus;
-import com.lynden.gmapsfx.service.elevation.LocationElevationRequest;
-import com.lynden.gmapsfx.service.elevation.PathElevationRequest;
 import com.lynden.gmapsfx.javascript.event.UIEventType;
-import com.lynden.gmapsfx.javascript.object.Animation;
-import com.lynden.gmapsfx.javascript.object.DirectionsPane;
-import com.lynden.gmapsfx.javascript.object.GoogleMap;
-import com.lynden.gmapsfx.javascript.object.InfoWindow;
-import com.lynden.gmapsfx.javascript.object.InfoWindowOptions;
-import com.lynden.gmapsfx.javascript.object.LatLong;
-import com.lynden.gmapsfx.javascript.object.LatLongBounds;
-import com.lynden.gmapsfx.javascript.object.MVCArray;
-import com.lynden.gmapsfx.javascript.object.MapOptions;
-import com.lynden.gmapsfx.javascript.object.MapTypeIdEnum;
-import com.lynden.gmapsfx.javascript.object.Marker;
-import com.lynden.gmapsfx.javascript.object.MarkerOptions;
-import com.lynden.gmapsfx.service.directions.DirectionStatus;
-import com.lynden.gmapsfx.service.directions.DirectionsGeocodedWaypoint;
-import com.lynden.gmapsfx.service.directions.DirectionsLeg;
-import com.lynden.gmapsfx.service.directions.DirectionsRenderer;
-import com.lynden.gmapsfx.service.directions.DirectionsRequest;
-import com.lynden.gmapsfx.service.directions.DirectionsResult;
-import com.lynden.gmapsfx.service.directions.DirectionsService;
-import com.lynden.gmapsfx.service.directions.DirectionsServiceCallback;
-import com.lynden.gmapsfx.service.directions.DirectionsSteps;
-import com.lynden.gmapsfx.service.directions.DirectionsWaypoint;
-import com.lynden.gmapsfx.service.directions.TravelModes;
-import com.lynden.gmapsfx.service.geocoding.GeocoderRequest;
+import com.lynden.gmapsfx.javascript.object.*;
+import com.lynden.gmapsfx.service.directions.*;
+import com.lynden.gmapsfx.service.elevation.*;
 import com.lynden.gmapsfx.service.geocoding.GeocoderStatus;
 import com.lynden.gmapsfx.service.geocoding.GeocodingResult;
 import com.lynden.gmapsfx.service.geocoding.GeocodingService;
 import com.lynden.gmapsfx.service.geocoding.GeocodingServiceCallback;
-import com.lynden.gmapsfx.shapes.ArcBuilder;
-import com.lynden.gmapsfx.shapes.Circle;
-import com.lynden.gmapsfx.shapes.CircleOptions;
-import com.lynden.gmapsfx.shapes.Polygon;
-import com.lynden.gmapsfx.shapes.PolygonOptions;
-import com.lynden.gmapsfx.shapes.Polyline;
-import com.lynden.gmapsfx.shapes.PolylineOptions;
-import com.lynden.gmapsfx.shapes.Rectangle;
-import com.lynden.gmapsfx.shapes.RectangleOptions;
-import com.lynden.gmapsfx.zoom.MaxZoomResult;
-import com.lynden.gmapsfx.zoom.MaxZoomService;
-import com.lynden.gmapsfx.zoom.MaxZoomServiceCallback;
-import java.util.List;
-import java.util.Locale;
+import com.lynden.gmapsfx.shapes.*;
+import com.lynden.gmapsfx.util.ApiKeyUtil;
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.beans.value.ObservableValue;
-import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
-import static javafx.application.Application.launch;
+
+import java.util.Locale;
 
 /**
  * Example Application for creating and loading a GoogleMap into a JavaFX
@@ -93,7 +52,7 @@ public class MainApp extends Application implements MapComponentInitializedListe
     @Override
     public void start(final Stage stage) throws Exception {
         System.out.println("Java version: " + System.getProperty("java.home"));
-        mapComponent = new GoogleMapView(Locale.getDefault().getLanguage(), null);
+        mapComponent = new GoogleMapView(Locale.getDefault().getLanguage(), ApiKeyUtil.getApiKey());
         mapComponent.addMapInializedListener(this);
                 
         BorderPane bp = new BorderPane();

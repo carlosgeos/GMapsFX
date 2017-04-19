@@ -1,5 +1,13 @@
 package com.lynden.gmapsfx;
 
+import com.lynden.gmapsfx.javascript.event.GMapMouseEvent;
+import com.lynden.gmapsfx.javascript.event.MouseEventHandler;
+import com.lynden.gmapsfx.service.elevation.ElevationResult;
+import com.lynden.gmapsfx.service.elevation.ElevationService;
+import com.lynden.gmapsfx.service.elevation.ElevationServiceCallback;
+import com.lynden.gmapsfx.service.elevation.ElevationStatus;
+import com.lynden.gmapsfx.service.elevation.LocationElevationRequest;
+import com.lynden.gmapsfx.service.elevation.PathElevationRequest;
 import com.lynden.gmapsfx.javascript.event.UIEventType;
 import com.lynden.gmapsfx.javascript.object.*;
 import com.lynden.gmapsfx.service.directions.*;
@@ -29,7 +37,7 @@ import java.util.Locale;
  *
  * @author Rob Terpilowski
  */
-public class MainApp extends Application implements MapComponentInitializedListener, 
+public class MainApp extends Application implements MapComponentInitializedListener,
         ElevationServiceCallback, GeocodingServiceCallback, DirectionsServiceCallback{
 
     protected GoogleMapView mapComponent;
@@ -42,19 +50,19 @@ public class MainApp extends Application implements MapComponentInitializedListe
     private Label lblCenter;
     private Label lblClick;
     private ComboBox<MapTypeIdEnum> mapTypeCombo;
-	
+
 	private MarkerOptions markerOptions2;
 	private Marker myMarker2;
 	private Button btnHideMarker;
 	private Button btnDeleteMarker;
 
-        
+
     @Override
     public void start(final Stage stage) throws Exception {
         System.out.println("Java version: " + System.getProperty("java.home"));
         mapComponent = new GoogleMapView(Locale.getDefault().getLanguage(), ApiKeyUtil.getApiKey());
         mapComponent.addMapInializedListener(this);
-                
+
         BorderPane bp = new BorderPane();
         ToolBar tb = new ToolBar();
 
@@ -73,24 +81,24 @@ public class MainApp extends Application implements MapComponentInitializedListe
         lblZoom = new Label();
         lblCenter = new Label();
         lblClick = new Label();
-        
+
         mapTypeCombo = new ComboBox<>();
         mapTypeCombo.setOnAction( e -> {
            map.setMapType(mapTypeCombo.getSelectionModel().getSelectedItem() );
         });
         mapTypeCombo.setDisable(true);
-        
+
         Button btnType = new Button("Map type");
         btnType.setOnAction(e -> {
             map.setMapType(MapTypeIdEnum.HYBRID);
         });
-		
+
 		btnHideMarker = new Button("Hide Marker");
 		btnHideMarker.setOnAction(e -> {hideMarker();});
-		
+
 		btnDeleteMarker = new Button("Delete Marker");
 		btnDeleteMarker.setOnAction(e -> {deleteMarker();});
-		
+
         tb.getItems().addAll(btnZoomIn, btnZoomOut, mapTypeCombo,
                 new Label("Zoom: "), lblZoom,
                 new Label("Center: "), lblCenter,
@@ -98,7 +106,7 @@ public class MainApp extends Application implements MapComponentInitializedListe
 				btnHideMarker, btnDeleteMarker);
 
         bp.setTop(tb);
-        
+
         bp.setCenter(mapComponent);
 
         Scene scene = new Scene(bp);
@@ -107,19 +115,19 @@ public class MainApp extends Application implements MapComponentInitializedListe
     }
 
     DirectionsRenderer renderer;
-    
+
     @Override
     public void mapInitialized() {
-        
+
         //System.out.println("MainApp.mapInitialised....");
-        
+
         //Once the map has been loaded by the Webview, initialize the map details.
         LatLong center = new LatLong(47.606189, -122.335842);
         mapComponent.addMapReadyListener(() -> {
             // This call will fail unless the map is completely ready.
             checkCenter(center);
         });
-        
+
         MapOptions options = new MapOptions();
         options.center(center)
                 .mapMarker(true)
@@ -132,11 +140,11 @@ public class MainApp extends Application implements MapComponentInitializedListe
                 .zoomControl(false)
                 .mapType(MapTypeIdEnum.TERRAIN)
                 .styleString("[{'featureType':'landscape','stylers':[{'saturation':-100},{'lightness':65},{'visibility':'on'}]},{'featureType':'poi','stylers':[{'saturation':-100},{'lightness':51},{'visibility':'simplified'}]},{'featureType':'road.highway','stylers':[{'saturation':-100},{'visibility':'simplified'}]},{\"featureType\":\"road.arterial\",\"stylers\":[{\"saturation\":-100},{\"lightness\":30},{\"visibility\":\"on\"}]},{\"featureType\":\"road.local\",\"stylers\":[{\"saturation\":-100},{\"lightness\":40},{\"visibility\":\"on\"}]},{\"featureType\":\"transit\",\"stylers\":[{\"saturation\":-100},{\"visibility\":\"simplified\"}]},{\"featureType\":\"administrative.province\",\"stylers\":[{\"visibility\":\"off\"}]},{\"featureType\":\"water\",\"elementType\":\"labels\",\"stylers\":[{\"visibility\":\"on\"},{\"lightness\":-25},{\"saturation\":-100}]},{\"featureType\":\"water\",\"elementType\":\"geometry\",\"stylers\":[{\"hue\":\"#ffff00\"},{\"lightness\":-25},{\"saturation\":-97}]}]");
-        
+
         //[{\"featureType\":\"landscape\",\"stylers\":[{\"saturation\":-100},{\"lightness\":65},{\"visibility\":\"on\"}]},{\"featureType\":\"poi\",\"stylers\":[{\"saturation\":-100},{\"lightness\":51},{\"visibility\":\"simplified\"}]},{\"featureType\":\"road.highway\",\"stylers\":[{\"saturation\":-100},{\"visibility\":\"simplified\"}]},{\"featureType\":\"road.arterial\",\"stylers\":[{\"saturation\":-100},{\"lightness\":30},{\"visibility\":\"on\"}]},{\"featureType\":\"road.local\",\"stylers\":[{\"saturation\":-100},{\"lightness\":40},{\"visibility\":\"on\"}]},{\"featureType\":\"transit\",\"stylers\":[{\"saturation\":-100},{\"visibility\":\"simplified\"}]},{\"featureType\":\"administrative.province\",\"stylers\":[{\"visibility\":\"off\"}]},{\"featureType\":\"water\",\"elementType\":\"labels\",\"stylers\":[{\"visibility\":\"on\"},{\"lightness\":-25},{\"saturation\":-100}]},{\"featureType\":\"water\",\"elementType\":\"geometry\",\"stylers\":[{\"hue\":\"#ffff00\"},{\"lightness\":-25},{\"saturation\":-97}]}]
         map = mapComponent.createMap(options,false);
         directions = mapComponent.getDirec();
-        
+
         map.setHeading(123.2);
 //        System.out.println("Heading is: " + map.getHeading() );
 
@@ -167,8 +175,8 @@ public class MainApp extends Application implements MapComponentInitializedListe
 
         InfoWindow window = new InfoWindow(infoOptions);
         window.open(map, myMarker);
-        
-        
+
+
         map.fitBounds(new LatLongBounds(new LatLong(30, 120), center));
 //        System.out.println("Bounds : " + map.getBounds());
 
@@ -188,6 +196,8 @@ public class MainApp extends Application implements MapComponentInitializedListe
 //        map.addStateEventHandler(MapStateEventType.tilesloaded, () -> {
 //			System.out.println("We got a tilesloaded event on the map");
 //		});
+
+
         map.addUIEventHandler(UIEventType.click, (JSObject obj) -> {
             LatLong ll = new LatLong((JSObject) obj.getMember("latLng"));
             //System.out.println("LatLong: lat: " + ll.getLatitude() + " lng: " + ll.getLongitude());
@@ -197,7 +207,7 @@ public class MainApp extends Application implements MapComponentInitializedListe
         btnZoomIn.setDisable(false);
         btnZoomOut.setDisable(false);
         mapTypeCombo.setDisable(false);
-        
+
         mapTypeCombo.getItems().addAll( MapTypeIdEnum.ALL );
 
         LatLong[] ary = new LatLong[]{markerLatLong, markerLatLong2};
@@ -282,58 +292,58 @@ public class MainApp extends Application implements MapComponentInitializedListe
         map.addUIEventHandler(arc, UIEventType.click, (JSObject obj) -> {
             arc.setEditable(!arc.getEditable());
         });
-        
+
         GeocodingService gs = new GeocodingService();
-        
+
         DirectionsService ds = new DirectionsService();
         renderer = new DirectionsRenderer(true, map, directions);
-        
+
         DirectionsWaypoint[] dw = new DirectionsWaypoint[2];
         dw[0] = new DirectionsWaypoint("São Paulo - SP");
         dw[1] = new DirectionsWaypoint("Juiz de Fora - MG");
-        
+
         DirectionsRequest dr = new DirectionsRequest(
                 "Belo Horizonte - MG",
                 "Rio de Janeiro - RJ",
                 TravelModes.DRIVING,
                 dw);
         ds.getRoute(dr, this, renderer);
-        
+
         LatLong[] location = new LatLong[1];
         location[0] = new LatLong(-19.744056, -43.958699);
         LocationElevationRequest loc = new LocationElevationRequest(location);
         ElevationService es = new ElevationService();
         es.getElevationForLocations(loc, this);
-        
+
     }
-	
-	
+
+
 	private void hideMarker() {
 //		System.out.println("deleteMarker");
-		
+
 		boolean visible = myMarker2.getVisible();
-		
+
 		//System.out.println("Marker was visible? " + visible);
-		
+
 		myMarker2.setVisible(! visible);
 
 //				markerOptions2.visible(Boolean.FALSE);
 //				myMarker2.setOptions(markerOptions2);
 //		System.out.println("deleteMarker - made invisible?");
 	}
-	
+
 	private void deleteMarker() {
 		//System.out.println("Marker was removed?");
 		map.removeMarker(myMarker2);
 	}
-	
+
     private void checkCenter(LatLong center) {
 //        System.out.println("Testing fromLatLngToPoint using: " + center);
 //        Point2D p = map.fromLatLngToPoint(center);
 //        System.out.println("Testing fromLatLngToPoint result: " + p);
 //        System.out.println("Testing fromLatLngToPoint expected: " + mapComponent.getWidth()/2 + ", " + mapComponent.getHeight()/2);
     }
-    
+
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
      * main() serves only as fallback in case the application can not be
@@ -363,9 +373,9 @@ public class MainApp extends Application implements MapComponentInitializedListe
                 System.out.println(e.getVariableName());
                 System.out.println("GEOCODE: " + e.getFormattedAddress() + "\n" + e.toString());
             }
-            
+
         }
-        
+
     }
 
     @Override
@@ -373,10 +383,10 @@ public class MainApp extends Application implements MapComponentInitializedListe
         if(status.equals(DirectionStatus.OK)){
             mapComponent.getMap().showDirectionsPane();
             System.out.println("OK");
-            
+
             DirectionsResult e = results;
             GeocodingService gs = new GeocodingService();
-            
+
             System.out.println("SIZE ROUTES: " + e.getRoutes().size() + "\n" + "ORIGIN: " + e.getRoutes().get(0).getLegs().get(0).getStartLocation());
             //gs.reverseGeocode(e.getRoutes().get(0).getLegs().get(0).getStartLocation().getLatitude(), e.getRoutes().get(0).getLegs().get(0).getStartLocation().getLongitude(), this);
             System.out.println("LEGS SIZE: " + e.getRoutes().get(0).getLegs().size());
